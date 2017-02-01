@@ -1,0 +1,10 @@
+version: '2'
+services:
+  redis:
+    image: redis:3
+    ports:
+      - "6379:6379"
+  flume-ng:
+    image: flume-ng:1.7.0
+    links:
+      - redis
