@@ -62,45 +62,45 @@ public class RedisClientTest {
     public void testConnect() {
         Mockito.when(mockJedis.ping()).thenReturn("PONG");
 
-        boolean connected = client.openConnection();
+        client.openConnection();
 
-        Assert.assertTrue(connected);
+        Assert.assertTrue(true);
     }
 
     @Test
     public void testConnectWithRetry() {
         Mockito.when(mockJedis.ping()).thenReturn("NOT PONG").thenReturn("PONG");
 
-        boolean connected = client.openConnection();
+        client.openConnection();
 
-        Assert.assertTrue(connected);
+        Assert.assertTrue(true);
     }
 
-    @Test
+    @Test(expectedExceptions = JedisConnectionException.class)
     public void testFailConnect() {
         Mockito.doThrow(JedisConnectionException.class).when(mockJedis).connect();
 
-        boolean connected = client.openConnection();
+        client.openConnection();
 
-        Assert.assertFalse(connected);
+        Assert.assertTrue(false);
     }
 
-    @Test
+    @Test(expectedExceptions = JedisConnectionException.class)
     public void testFailConnectExpectedPong() {
         Mockito.when(mockJedis.ping()).thenReturn("NOT PONG");
 
-        boolean connected = client.openConnection();
+        client.openConnection();
 
-        Assert.assertFalse(connected);
+        Assert.assertTrue(false);
     }
 
-    @Test
+    @Test(expectedExceptions = JedisDataException.class)
     public void testFailAuthorization() {
         Mockito.when(mockJedis.auth(Mockito.anyString())).thenThrow(JedisDataException.class);
 
-        boolean connected = client.openConnection();
+        client.openConnection();
 
-        Assert.assertFalse(connected);
+        Assert.assertTrue(false);
     }
 
     private static Map.Entry<String, String> entry(String key, String value) {

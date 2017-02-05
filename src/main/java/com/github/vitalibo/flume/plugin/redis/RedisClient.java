@@ -17,7 +17,7 @@ import redis.clients.jedis.exceptions.JedisException;
 @AllArgsConstructor
 public class RedisClient implements Configurable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisClient.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisClient.class);
 
     @Delegate
     private Jedis client;
@@ -40,9 +40,9 @@ public class RedisClient implements Configurable {
     }
 
     @SneakyThrows(InterruptedException.class)
-    public boolean openConnection() {
-        LOGGER.info("Redis connecting...");
-        for (int i = 0; i < 3; i++) {
+    public void openConnection() {
+        logger.info("Redis connecting...");
+        for (int retry = 0; true; retry++) {
             try {
                 if (password != null) {
                     client.auth(password);
@@ -53,16 +53,18 @@ public class RedisClient implements Configurable {
                     throw new JedisConnectionException("Server returned values not equals 'PONG'.");
                 }
 
-                LOGGER.info("Redis connected to " + host + ":" + port);
-                return true;
+                logger.info("Redis connected to " + host + ":" + port);
+                return;
             } catch (JedisException e) {
-                LOGGER.error("Connection failed.", e);
-                LOGGER.info("Waiting for {} milliseconds...", timeout);
+                logger.error("Connection failed.", e);
+                if (retry >= 2) {
+                    throw e;
+                }
+
+                logger.info("Waiting for {} milliseconds...", timeout);
                 Thread.sleep(timeout);
             }
         }
-
-        return false;
     }
 
 }
