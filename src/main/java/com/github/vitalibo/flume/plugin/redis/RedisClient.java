@@ -1,6 +1,8 @@
 package com.github.vitalibo.flume.plugin.redis;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.experimental.Delegate;
 import org.apache.flume.Context;
@@ -9,7 +11,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.exceptions.JedisConnectionException;
+import redis.clients.jedis.exceptions.JedisException;
 
+@NoArgsConstructor
+@AllArgsConstructor
 public class RedisClient implements Configurable {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RedisClient.class);
@@ -22,20 +27,8 @@ public class RedisClient implements Configurable {
     private int port;
     @Getter
     private int timeout;
-
+    @Getter
     private String password;
-
-    public RedisClient() {
-        super();
-    }
-
-    public RedisClient(Jedis client, String host, int port, int timeout, String password) {
-        this.client = client;
-        this.host = host;
-        this.port = port;
-        this.timeout = timeout;
-        this.password = password;
-    }
 
     @Override
     public void configure(Context context) {
@@ -43,26 +36,29 @@ public class RedisClient implements Configurable {
         this.port = context.getInteger("redis.port", 6379);
         this.timeout = context.getInteger("redis.timeout", 2000);
         this.password = context.getString("redis.password", null);
+        this.client = new Jedis(host, port, timeout);
     }
 
     @SneakyThrows(InterruptedException.class)
-    public boolean _connect() {
+    public boolean openConnection() {
         LOGGER.info("Redis connecting...");
-        for (int i = 0; i < 10; i++) {
+        for (int i = 0; i < 3; i++) {
             try {
-                client = new Jedis(host, port, timeout);
-
                 if (password != null) {
                     client.auth(password);
                 }
 
                 client.connect();
-                LOGGER.info("Redis Connected to " + host + ":" + port);
+                if (!"PONG".equals(client.ping())) {
+                    throw new JedisConnectionException("Server returned values not equals 'PONG'.");
+                }
+
+                LOGGER.info("Redis connected to " + host + ":" + port);
                 return true;
-            } catch (JedisConnectionException e) {
+            } catch (JedisException e) {
                 LOGGER.error("Connection failed.", e);
-                LOGGER.info("Waiting for 10 seconds...");
-                Thread.sleep(10000);
+                LOGGER.info("Waiting for {} milliseconds...", timeout);
+                Thread.sleep(timeout);
             }
         }
 

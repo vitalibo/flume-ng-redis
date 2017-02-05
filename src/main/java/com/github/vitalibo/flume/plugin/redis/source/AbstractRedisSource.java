@@ -26,7 +26,7 @@ public class AbstractRedisSource extends AbstractSource implements Configurable 
     public synchronized void start() {
         super.start();
 
-        client._connect();
+        client.openConnection();
     }
 
     @Override

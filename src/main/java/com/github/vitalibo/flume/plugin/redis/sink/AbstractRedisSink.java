@@ -27,7 +27,7 @@ public class AbstractRedisSink extends AbstractSink implements Configurable {
     public synchronized void start() {
         super.start();
 
-        client._connect();
+        client.openConnection();
     }
 
     @Override
