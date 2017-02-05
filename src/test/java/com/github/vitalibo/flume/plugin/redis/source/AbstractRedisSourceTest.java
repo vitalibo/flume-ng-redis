@@ -2,6 +2,7 @@ package com.github.vitalibo.flume.plugin.redis.source;
 
 import com.github.vitalibo.flume.plugin.redis.RedisClient;
 import org.apache.flume.Context;
+import org.apache.flume.EventDeliveryException;
 import org.apache.flume.channel.ChannelProcessor;
 import org.apache.flume.lifecycle.LifecycleState;
 import org.mockito.Mock;
@@ -15,7 +16,7 @@ import redis.clients.jedis.exceptions.JedisException;
 public class AbstractRedisSourceTest {
 
     @Mock
-    private RedisClient client;
+    private RedisClient mockClient;
     @Mock
     private ChannelProcessor mockChannelProcessor;
 
@@ -24,7 +25,11 @@ public class AbstractRedisSourceTest {
     @BeforeMethod
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        source = new AbstractRedisSource(client) {
+        source = new AbstractRedisSource(mockClient) {
+            @Override
+            protected Status doProcess() throws EventDeliveryException {
+                return null;
+            }
         };
         source.setChannelProcessor(mockChannelProcessor);
     }
@@ -35,7 +40,7 @@ public class AbstractRedisSourceTest {
 
         source.configure(context);
 
-        Mockito.verify(client).configure(Mockito.eq(context));
+        Mockito.verify(mockClient).configure(Mockito.eq(context));
         Assert.assertNotEquals(source.getLifecycleState(), LifecycleState.ERROR);
     }
 
@@ -43,17 +48,17 @@ public class AbstractRedisSourceTest {
     public void testStart() {
         source.start();
 
-        Mockito.verify(client).openConnection();
+        Mockito.verify(mockClient).openConnection();
         Assert.assertNotEquals(source.getLifecycleState(), LifecycleState.ERROR);
     }
 
     @Test
     public void testFailStart() {
-        Mockito.doThrow(JedisException.class).when(client).openConnection();
+        Mockito.doThrow(JedisException.class).when(mockClient).openConnection();
 
         source.start();
 
-        Mockito.verify(client).openConnection();
+        Mockito.verify(mockClient).openConnection();
         Assert.assertEquals(source.getLifecycleState(), LifecycleState.ERROR);
     }
 

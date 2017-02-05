@@ -6,13 +6,13 @@ import lombok.Getter;
 import org.apache.flume.Context;
 import org.apache.flume.FlumeException;
 import org.apache.flume.conf.Configurable;
-import org.apache.flume.source.BasicSourceSemantics;
+import org.apache.flume.source.AbstractPollableSource;
 
 @AllArgsConstructor
-public abstract class AbstractRedisSource extends BasicSourceSemantics implements Configurable {
+public abstract class AbstractRedisSource extends AbstractPollableSource implements Configurable {
 
     @Getter
-    private final RedisClient client;
+    protected final RedisClient client;
 
     public AbstractRedisSource() {
         this(new RedisClient());
