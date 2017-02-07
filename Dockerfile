@@ -16,6 +16,6 @@ RUN tar xvzf /tmp/apache-flume-${VERSION}-bin.tar.gz -C /opt \
 
 ENV PATH=/opt/flume/bin:${PATH}
 
-WORKDIR /opt/flume
+WORKDIR /root
 
-ENTRYPOINT ["bin/flume-ng", "agent"]
+ENTRYPOINT ["flume-ng", "agent", "-C", "/root/target/flume-ng-redis-0.1.0-SNAPSHOT.jar", "-n", "a1", "-c", "conf", "-f"]
