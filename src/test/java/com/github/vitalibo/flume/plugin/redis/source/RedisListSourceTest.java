@@ -6,6 +6,7 @@ import org.apache.flume.Event;
 import org.apache.flume.EventDeliveryException;
 import org.apache.flume.PollableSource;
 import org.apache.flume.channel.ChannelProcessor;
+import org.apache.flume.lifecycle.LifecycleState;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Mockito;
@@ -39,12 +40,13 @@ public class RedisListSourceTest {
 
     @Test
     public void testConfigure() {
-        source = new RedisListSource();
+        source = new RedisListSource(mockClient, 5, "redis.list.test");
         Context context = new Context(Stream.of(entry("database", "1"), entry("key", "test"))
             .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue)));
 
         source.configure(context);
 
+        Mockito.verify(mockClient).configure(context);
         Assert.assertEquals(source.getDatabase(), new Integer(1));
         Assert.assertEquals(source.getKey(), "test");
     }
@@ -56,6 +58,27 @@ public class RedisListSourceTest {
         source.configure(new Context());
 
         Assert.assertTrue(false);
+    }
+
+    @Test
+    public void testStart() {
+        Mockito.reset(mockClient);
+
+        source.start();
+
+        Mockito.verify(mockClient).openConnection();
+        Assert.assertNotEquals(source.getLifecycleState(), LifecycleState.ERROR);
+    }
+
+    @Test
+    public void testFailStart() {
+        Mockito.reset(mockClient);
+        Mockito.doThrow(JedisException.class).when(mockClient).openConnection();
+
+        source.start();
+
+        Mockito.verify(mockClient).openConnection();
+        Assert.assertEquals(source.getLifecycleState(), LifecycleState.ERROR);
     }
 
     @Test

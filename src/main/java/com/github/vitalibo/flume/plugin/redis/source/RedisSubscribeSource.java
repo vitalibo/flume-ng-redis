@@ -19,7 +19,7 @@ import redis.clients.jedis.exceptions.JedisConnectionException;
 
 public class RedisSubscribeSource extends AbstractSource implements EventDrivenSource, Configurable {
 
-    private static final Logger LOGGER = LoggerFactory.getLogger(RedisSubscribeSource.class);
+    private static final Logger logger = LoggerFactory.getLogger(RedisSubscribeSource.class);
 
     @Getter
     private final RedisClient client;
@@ -72,10 +72,10 @@ public class RedisSubscribeSource extends AbstractSource implements EventDrivenS
                 try {
                     client.subscribe(this, channels);
                 } catch (JedisConnectionException e) {
-                    LOGGER.error("Disconnected from Redis server ...", e);
+                    logger.error("Disconnected from Redis server ...", e);
                     client.connect();
                 } catch (Exception e) {
-                    LOGGER.error("Unexpected exception in Redis RedisSubscriber.", e);
+                    logger.error("Unexpected exception in Redis RedisSubscriber.", e);
                     throw e;
                 }
             }

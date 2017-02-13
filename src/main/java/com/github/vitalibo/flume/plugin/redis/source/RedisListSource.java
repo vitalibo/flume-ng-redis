@@ -2,34 +2,36 @@ package com.github.vitalibo.flume.plugin.redis.source;
 
 import com.github.vitalibo.flume.plugin.redis.RedisClient;
 import com.google.common.base.Preconditions;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import org.apache.flume.*;
 import org.apache.flume.channel.ChannelProcessor;
+import org.apache.flume.conf.Configurable;
 import org.apache.flume.event.EventBuilder;
+import org.apache.flume.source.AbstractPollableSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import redis.clients.jedis.exceptions.JedisException;
 
-@NoArgsConstructor
-public class RedisListSource extends AbstractRedisSource implements PollableSource {
+@AllArgsConstructor
+public class RedisListSource extends AbstractPollableSource implements Configurable, PollableSource {
 
     private static final Logger logger = LoggerFactory.getLogger(RedisListSource.class);
 
+    @Getter
+    private final RedisClient client;
     @Getter
     private Integer database;
     @Getter
     private String key;
 
-    public RedisListSource(RedisClient client, Integer database, String key) {
-        super(client);
-        this.database = database;
-        this.key = key;
+    public RedisListSource() {
+        this.client = new RedisClient();
     }
 
     @Override
     protected void doConfigure(Context context) throws FlumeException {
-        super.doConfigure(context);
+        client.configure(context);
 
         this.database = context.getInteger("redis.database", 0);
         this.key = context.getString("redis.key");
@@ -38,11 +40,16 @@ public class RedisListSource extends AbstractRedisSource implements PollableSour
 
     @Override
     protected void doStart() throws FlumeException {
-        super.doStart();
+        client.openConnection();
 
         if (database != 0) {
             client.select(database);
         }
+    }
+
+    @Override
+    protected void doStop() throws FlumeException {
+        client.disconnect();
     }
 
     @Override
