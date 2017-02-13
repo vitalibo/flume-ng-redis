@@ -19,7 +19,7 @@ public abstract class AbstractRedisSink extends AbstractSink implements Configur
     private static final Logger logger = LoggerFactory.getLogger(AbstractRedisSink.class);
 
     @Getter
-    private final RedisClient client;
+    protected final RedisClient client;
 
     public AbstractRedisSink() {
         this(new RedisClient());
