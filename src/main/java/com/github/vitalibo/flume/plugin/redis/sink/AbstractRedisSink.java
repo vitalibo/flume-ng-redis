@@ -21,7 +21,7 @@ public abstract class AbstractRedisSink extends AbstractSink implements Configur
     @Getter
     protected final RedisClient client;
 
-    public AbstractRedisSink() {
+    AbstractRedisSink() {
         this(new RedisClient());
     }
 
@@ -58,7 +58,7 @@ public abstract class AbstractRedisSink extends AbstractSink implements Configur
         }
     }
 
-    private Status process(Channel channel) {
+    private Status process(Channel channel) throws EventDeliveryException {
         Transaction transaction = channel.getTransaction();
 
         try {
@@ -75,6 +75,6 @@ public abstract class AbstractRedisSink extends AbstractSink implements Configur
         }
     }
 
-    public abstract Status doProcess(Channel channel);
+    public abstract Status doProcess(Channel channel) throws EventDeliveryException;
 
 }

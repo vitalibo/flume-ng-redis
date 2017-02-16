@@ -17,11 +17,13 @@ public abstract class AbstractRedisTypeSink extends AbstractRedisSink {
     @Getter
     private Integer database;
     @Getter
-    private Matcher key;
+    private String key;
     @Getter
     private String counter;
 
-    public AbstractRedisTypeSink(RedisClient client) {
+    private Matcher keyMatcher;
+
+    AbstractRedisTypeSink(RedisClient client) {
         super(client);
     }
 
@@ -31,10 +33,12 @@ public abstract class AbstractRedisTypeSink extends AbstractRedisSink {
 
         this.database = context.getInteger("redis.database", 0);
         this.counter = context.getString("redis.counter", "flume:agent:" + this.getName() + ":counter");
-        String key = context.getString("redis.key");
+        this.key = context.getString("redis.key");
         Preconditions.checkNotNull(key, "Redis key must be set.");
-        this.key = AUTO_INCREMENT_PATTERN.matcher(key);
-        Preconditions.checkState(this.key.find(), "Incorrect key format. Please use 'key:#AUTO_INCREMENT:id'.");
+        Matcher matcher = AUTO_INCREMENT_PATTERN.matcher(key);
+        if (matcher.find()) {
+            this.keyMatcher = matcher;
+        }
     }
 
     @Override
@@ -46,10 +50,13 @@ public abstract class AbstractRedisTypeSink extends AbstractRedisSink {
         }
     }
 
-    protected String nextKey() {
-        Long nextId = client.incr(counter);
+    String nextKey() {
+        if (keyMatcher == null) {
+            throw new IllegalStateException("Incorrect key format. Please use 'key:#AUTO_INCREMENT:id'.");
+        }
 
-        return key.replaceAll(String.valueOf(nextId));
+        Long nextId = client.incr(counter);
+        return keyMatcher.replaceAll(String.valueOf(nextId));
     }
 
 }

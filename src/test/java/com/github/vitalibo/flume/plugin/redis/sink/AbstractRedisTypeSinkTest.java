@@ -41,6 +41,8 @@ public class AbstractRedisTypeSinkTest {
     public void testIncorrectKeyFormat() {
         sink.configure(makeContext("incorrect format"));
 
+        sink.nextKey();
+
         Assert.assertTrue(false);
     }
 
