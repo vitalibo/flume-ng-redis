@@ -14,5 +14,5 @@ Implementation of Redis sources and sinks for Flume NG
     - [ ] List
     - [ ] Hash
     - [ ] Set
-    - [ ] String
+    - [x] String
     - [ ] Publish

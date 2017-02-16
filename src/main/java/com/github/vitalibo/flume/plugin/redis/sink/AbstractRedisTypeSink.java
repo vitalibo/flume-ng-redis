@@ -46,7 +46,7 @@ public abstract class AbstractRedisTypeSink extends AbstractRedisSink {
         }
     }
 
-    public String getNextKey() {
+    protected String nextKey() {
         Long nextId = client.incr(counter);
 
         return key.replaceAll(String.valueOf(nextId));

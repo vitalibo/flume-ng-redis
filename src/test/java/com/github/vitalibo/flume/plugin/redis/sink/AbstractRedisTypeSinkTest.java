@@ -59,7 +59,7 @@ public class AbstractRedisTypeSinkTest {
         Mockito.when(mockClient.incr(Mockito.anyString())).thenReturn(1L).thenReturn(2L).thenReturn(3L);
         sink.configure(context);
 
-        String[] keys = Stream.generate(() -> sink.getNextKey())
+        String[] keys = Stream.generate(() -> sink.nextKey())
             .limit(4)
             .toArray(String[]::new);
 
