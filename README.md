@@ -12,7 +12,7 @@ Implementation of Redis sources and sinks for Flume NG
     - [x] Subscribe
 - [ ] Sinks
     - [x] List
-    - [ ] Hash
+    - [x] Hash
     - [x] Set
     - [x] String
     - [ ] Publish

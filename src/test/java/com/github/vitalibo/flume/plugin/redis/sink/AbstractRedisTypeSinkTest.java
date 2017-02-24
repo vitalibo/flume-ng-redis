@@ -37,7 +37,7 @@ public class AbstractRedisTypeSinkTest {
         Mockito.verify(mockClient).configure(context);
     }
 
-    @Test(expectedExceptions = IllegalStateException.class)
+    @Test(expectedExceptions = IllegalArgumentException.class)
     public void testIncorrectKeyFormat() {
         sink.configure(makeContext("incorrect format"));
 

@@ -52,7 +52,7 @@ public abstract class AbstractRedisTypeSink extends AbstractRedisSink {
 
     String nextKey() {
         if (keyMatcher == null) {
-            throw new IllegalStateException("Incorrect key format. Please use 'key:#AUTO_INCREMENT:id'.");
+            throw new IllegalArgumentException("Incorrect key format. Please use 'key:#AUTO_INCREMENT:id'.");
         }
 
         Long nextId = client.incr(counter);
